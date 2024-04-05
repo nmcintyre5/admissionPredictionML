@@ -1,0 +1,8 @@
+# Ignore DS_Store
+.DS_Store
+
+#Ignore Coursera certificate
+Coursera F3HTRF8K96G6.pdf
+
+#Ignore HTML 
+admissionPredictor.html
