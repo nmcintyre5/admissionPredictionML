@@ -3,13 +3,21 @@ from pyspark.ml.regression import LinearRegression
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
-# Read HTML content from file
-# with open("admissionPredictor.html", "r") as file:
-#    html_content = file.read()
+''' Flask and HTML
+from flask import Flask, request, jsonify
 
-# Initialize Spark session
+app = Flask(__name__)
+
+# Read HTML content from file
+with open("admissionPredictor.html", "r") as file:
+    html_content = file.read()
+'''
+
+# Initialize a SparkSession with garbage collection metrics configured
 spark = SparkSession.builder \
-    .appName("Admission Predictor") \
+    .appName("spark") \
+    .config("spark.eventLog.gcMetrics.youngGenerationGarbageCollectors", "G1 Young Generation") \
+    .config("spark.eventLog.gcMetrics.oldGenerationGarbageCollectors", "G1 Old Generation") \
     .getOrCreate()
 
 # Load the data
@@ -33,6 +41,26 @@ def predict_admission_chance(gre_score, toefl_score, cgpa):
     prediction = model.transform(user_data).select(col("prediction").alias("Chance of Admit")).collect()[0]["Chance of Admit"]
     return prediction
 
+'''
+# JSON HTML data
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.json
+    # Extract input features from the data
+    gre_score = data['greScore']
+    toefl_score = data['toeflScore']
+    cgpa = data['cgpa']
+    
+    # Make prediction using the model
+    prediction = predict_admission_chance(gre_score, toefl_score, cgpa)
+    
+    # Return prediction result as JSON
+    return jsonify({'prediction': prediction})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+'''
 # Main program
 if __name__ == "__main__":
     # Get user input
@@ -52,4 +80,5 @@ if __name__ == "__main__":
     # Display prediction
     print("Your predicted chance of admission is:", admission_chance_percentage, "%")
 
-    # Stop Spark session
+# Stop Spark session
+spark.stop()
