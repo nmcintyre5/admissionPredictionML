@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admission Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admission Predictor</h1>
+    <form id="admission-form">
+        <label for="gre-score">GRE Score (260-340):</label><br>
+        <input type="text" id="greScore" name="greScore" required><br>
+        <label for="toefl-score">TOEFL Score (0-120):</label><br>
+        <input type="text" id="toeflScore" name="toeflScore" required><br>
+        <label for="cgpa">Cumulative GPA (0-4):</label><br>
+        <input type="text" id="cgpa" name="cgpa" required><br><br>
+        <input type="submit" value="Predict">
+    </form>
+
+    <div id="prediction-result" style="display: none;">
+        <h2>Predicted Chance of Admission:</h2>
+        <p id="prediction-value"></p>
+    </div>
+
+    <script>
+        document.getElementById("admission-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var greScore = parseFloat(document.getElementById("greScore").value);
+            var toeflScore = parseFloat(document.getElementById("toeflScore").value);
+            var cgpa = parseFloat(document.getElementById("cgpa").value);
+            var prediction = document.getElementById("prediction-value");
+
+            // Send user input to server for prediction
+            fetch("http://localhost:5000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({greScore: greScore, toeflScore: toeflScore, cgpa: cgpa}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data,"data on the front end")
+                // Display prediction result
+                document.getElementById("prediction-result").style.display = "block";
+                document.getElementById("prediction-value").textContent = data.prediction + "%";
+            })
+
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+
+
+</html>
